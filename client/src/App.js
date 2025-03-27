@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Dashboard from './Dashboard';
 import './App.css';
@@ -8,188 +8,278 @@ function App() {
     // STATE MANAGEMENT
     // ==========================================
     
-    // Original input state variables
+    // User information
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
-    // NEW: Added password state for authentication
     const [password, setPassword] = useState('');
     const [verificationCode, setVerificationCode] = useState('');
     
-    // Original application flow state
+    // UI state management
     const [message, setMessage] = useState('');
+    const [messageType, setMessageType] = useState(''); // 'success', 'error', 'info'
     const [isEmailSent, setIsEmailSent] = useState(false);
     const [isVerified, setIsVerified] = useState(false);
+    const [authMode, setAuthMode] = useState('register'); // 'register' or 'login'
+    const [isLoading, setIsLoading] = useState(false);
     
-    // NEW: Added authentication mode state to toggle between register and login
-    // This controls which form is displayed to the user
-    const [authMode, setAuthMode] = useState('register'); // Options: 'register' or 'login'
+    // Check for saved session on load
+    useEffect(() => {
+        const savedUser = localStorage.getItem('pulseUser');
+        if (savedUser) {
+            try {
+                const userData = JSON.parse(savedUser);
+                setName(userData.name);
+                setEmail(userData.email);
+                setIsVerified(true);
+            } catch (error) {
+                console.error('Error parsing saved user data:', error);
+                localStorage.removeItem('pulseUser');
+            }
+        }
+    }, []);
     
     // ==========================================
     // EVENT HANDLERS
     // ==========================================
     
-    // NEW: Renamed from handleSubmit to handleRegister
-    // Now specifically handles the registration form submission
     const handleRegister = async (e) => {
         e.preventDefault();
+        setIsLoading(true);
 
-        // Email validation remains the same
+        // Email validation
         const emailPattern = /@(spelman\.edu|morehouse\.edu)$/;
         if (!emailPattern.test(email)) {
             setMessage('Email must end with @spelman.edu or @morehouse.edu.');
+            setMessageType('error');
+            setIsLoading(false);
             return;
         }
 
         try {
-            // MODIFIED: Changed endpoint from /submit to /register
-            // NEW: Now sending password along with name and email
             const response = await axios.post('/register', { name, email, password });
             console.log("Registration API response:", response);
-            // Added fallback message in case response doesn't include a message
             setMessage(response.data.message || 'Verification code sent to your email!');
-            setIsEmailSent(true); // Show verification step
+            setMessageType('success');
+            setIsEmailSent(true);
         } catch (error) {
-            // IMPROVED: More detailed error message with fallback
             setMessage('Error during registration: ' + (error.response?.data?.message || error.message));
+            setMessageType('error');
+        } finally {
+            setIsLoading(false);
         }
     };
 
-    // NEW: Added function to handle login form submission
-    // This is completely new functionality for returning users
     const handleLogin = async (e) => {
         e.preventDefault();
+        setIsLoading(true);
         
         try {
-            // Makes API call to login endpoint with email and password
             const response = await axios.post('/login', { email, password });
             console.log("Login API response:", response);
             
             if (response.data.success) {
-                // NEW: Store user name from response if available
-                setName(response.data.name || 'User'); // Use name from response or default to 'User'
+                // Store user data
+                const userData = {
+                    name: response.data.name || name || 'User',
+                    email: email
+                };
+                
+                setName(userData.name);
                 setMessage('Login successful!');
-                // Skip verification for login and go straight to dashboard
-                setIsVerified(true); 
+                setMessageType('success');
+                setIsVerified(true);
+                
+                // Save to localStorage for persistent session
+                localStorage.setItem('pulseUser', JSON.stringify(userData));
             } else {
                 setMessage(response.data.message || 'Login failed. Please check your credentials.');
+                setMessageType('error');
             }
         } catch (error) {
             setMessage('Error during login: ' + (error.response?.data?.message || error.message));
+            setMessageType('error');
+        } finally {
+            setIsLoading(false);
         }
     };
 
-    // Verify email function remains largely unchanged
     const handleVerifyEmail = async () => {
+        setIsLoading(true);
+        
         try {
             const response = await axios.post('/verify', { email, verificationCode });
-            // IMPROVED: Added fallback message
             setMessage(response.data.message || 'Email verified successfully!');
+            setMessageType('success');
             
             if (response.data.success) {
-                setIsVerified(true); // Show dashboard
+                // Store user data
+                const userData = {
+                    name: name,
+                    email: email
+                };
+                
+                setIsVerified(true);
+                localStorage.setItem('pulseUser', JSON.stringify(userData));
             }
         } catch (error) {
-            setMessage('Invalid verification code.');
+            setMessage('Invalid verification code. Please try again.');
+            setMessageType('error');
+        } finally {
+            setIsLoading(false);
         }
     };
 
-    // MODIFIED: Logout handler now resets password state too
     const handleLogout = () => {
-        // Reset all states except authMode (keeps the same tab active)
+        // Clear all user data
         setName('');
         setEmail('');
-        setPassword(''); // NEW: Clear password on logout
+        setPassword('');
         setMessage('');
+        setMessageType('');
         setVerificationCode('');
         setIsEmailSent(false);
         setIsVerified(false);
+        
+        // Remove from localStorage
+        localStorage.removeItem('pulseUser');
     };
 
-    // NEW: Function to toggle between register and login modes
-    // This changes which form is displayed without changing page
     const toggleAuthMode = () => {
         setAuthMode(authMode === 'register' ? 'login' : 'register');
-        setMessage(''); // Clear any messages when switching modes
+        setMessage('');
+        setMessageType('');
+    };
+    
+    // Request a new verification code
+    const handleResendCode = async () => {
+        setIsLoading(true);
+        try {
+            const response = await axios.post('/resend-verification', { email });
+            setMessage(response.data.message || 'New verification code sent!');
+            setMessageType('success');
+        } catch (error) {
+            setMessage('Error sending verification code: ' + (error.response?.data?.message || error.message));
+            setMessageType('error');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     // ==========================================
     // COMPONENT RENDERING FUNCTIONS
     // ==========================================
     
-    // NEW: Separate function to render login form
-    // Keeps the JSX organized and easier to maintain
     const renderLoginForm = () => (
         <form onSubmit={handleLogin}>
-            <div>
+            <div className="form-group">
                 <label>Email</label>
                 <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Your university email"
+                    disabled={isLoading}
                     required
                 />
             </div>
-            <div>
+            <div className="form-group">
                 <label>Password</label>
                 <input
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Your password"
+                    disabled={isLoading}
                     required
                 />
             </div>
-            <button type="submit">Login</button>
+            <button type="submit" disabled={isLoading}>
+                {isLoading ? 'Logging in...' : 'Login'}
+            </button>
+            
+            <div className="auth-toggle">
+                Don't have an account? <a href="#" onClick={toggleAuthMode}>Register</a>
+            </div>
         </form>
     );
 
-    // NEW: Separate function to render registration form
-    // Similar to original form but adds password field
     const renderRegistrationForm = () => (
         <form onSubmit={handleRegister}>
-            <div>
-                <label>Name</label>
+            <div className="form-group">
+                <label>Full Name</label>
                 <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
+                    placeholder="Your full name"
+                    disabled={isLoading}
                     required
                 />
             </div>
-            <div>
+            <div className="form-group">
                 <label>Email</label>
                 <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Your university email"
+                    disabled={isLoading}
                     required
                 />
+                <small style={{ color: '#666', fontSize: '0.8rem', marginTop: '5px', display: 'block' }}>
+                    Must be a Spelman or Morehouse email
+                </small>
             </div>
-            <div>
+            <div className="form-group">
                 <label>Password</label>
                 <input
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Create a password"
+                    disabled={isLoading}
                     required
                 />
             </div>
-            <button type="submit">Register</button>
+            <button type="submit" disabled={isLoading}>
+                {isLoading ? 'Registering...' : 'Register'}
+            </button>
+            
+            <div className="auth-toggle">
+                Already have an account? <a href="#" onClick={toggleAuthMode}>Login</a>
+            </div>
         </form>
     );
 
-    // NEW: Separate function for verification form 
-    // Extracted from original code for better organization
     const renderVerificationForm = () => (
-        <div>
+        <div className="verification-container">
             <h2>Verify Your Email</h2>
-            <label>Enter Verification Code</label>
-            <input
-                type="text"
-                value={verificationCode}
-                onChange={(e) => setVerificationCode(e.target.value)}
-                required
-            />
-            <button onClick={handleVerifyEmail}>Verify</button>
+            <p>A verification code has been sent to {email}. Please enter it below:</p>
+            
+            <div className="form-group">
+                <input
+                    type="text"
+                    value={verificationCode}
+                    onChange={(e) => setVerificationCode(e.target.value)}
+                    placeholder="Enter code"
+                    disabled={isLoading}
+                    maxLength={6}
+                    required
+                />
+            </div>
+            
+            <button 
+                type="button" 
+                onClick={handleVerifyEmail}
+                disabled={isLoading}
+                style={{ marginBottom: '10px' }}
+            >
+                {isLoading ? 'Verifying...' : 'Verify Email'}
+            </button>
+            
+            <div style={{ marginTop: '15px', fontSize: '0.9rem' }}>
+                Didn't receive the code? <a href="#" onClick={handleResendCode}>Resend</a>
+            </div>
         </div>
     );
 
@@ -198,18 +288,15 @@ function App() {
     // ==========================================
     return (
         <div className="App">
-            {/* MODIFIED: Conditional rendering now includes more logic */}
             {!isVerified ? (
-                <>
-                    {/* CHANGED: Heading from "Enter Your Info" to "Welcome" */}
-                    <h1>Welcome</h1>
+                <div className="auth-container">
+                    <div className="app-title">PULSE</div>
+                    <div className="app-subtitle">Professor Undergrad Learning & Student Evaluations</div>
                     
-                    {/* Conditional rendering: Show verification form or auth forms */}
                     {isEmailSent ? (
                         renderVerificationForm()
                     ) : (
                         <>
-                            {/* NEW: Tab navigation for switching between register and login */}
                             <div className="auth-tabs">
                                 <button 
                                     className={`tab-btn ${authMode === 'register' ? 'active' : ''}`}
@@ -225,22 +312,23 @@ function App() {
                                 </button>
                             </div>
                             
-                            {/* NEW: Conditionally render either registration or login form */}
                             {authMode === 'register' ? renderRegistrationForm() : renderLoginForm()}
                         </>
                     )}
-                </>
+                    
+                    {message && (
+                        <div className={`message ${messageType}`}>
+                            {message}
+                        </div>
+                    )}
+                </div>
             ) : (
-                /* Dashboard component remains the same */
                 <Dashboard 
                     name={name} 
                     email={email} 
                     onLogout={handleLogout} 
                 />
             )}
-            
-            {/* Message display remains the same */}
-            {message && <p className="message">{message}</p>}
         </div>
     );
 }

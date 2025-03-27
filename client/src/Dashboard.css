@@ -1,151 +1,414 @@
-/* Import Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
-
-body {
-    background-color: #ffe6f2; /* Soft pink background */
-    font-family: 'Poppins', sans-serif;
-    color: #5a1a5b;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-}
-
-.App {
-    text-align: center;
-    background: white;
-    padding: 40px;
-    border-radius: 15px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    width: 350px;
-}
-
-h1 {
-    font-size: 24px;
-    font-weight: 600;
-    color: #ff4d94; /* Bright pink */
-    margin-bottom: 20px;
-}
-
-/* ADDED: h2 heading style for "Verify Your Email" and dashboard headings */
-h2 {
-    font-size: 20px;
-    font-weight: 600;
-    color: #ff4d94; /* Bright pink */
-    margin-bottom: 15px;
-}
-
-/* ADDED: h3 heading style for "Hello, [name]!" in dashboard */
-h3 {
-    font-size: 18px;
-    font-weight: 600;
-    color: #ff4d94; /* Bright pink */
-    margin-bottom: 10px;
-}
-
-/* Form Styling */
-form {
+/* Dashboard.css */
+.dashboard {
     display: flex;
     flex-direction: column;
-    align-items: center;
-}
-
-label {
-    font-size: 14px;
-    font-weight: 600;
-    margin: 10px 0 5px;
-}
-
-input {
-    width: 90%;
-    padding: 12px;
-    border: 2px solid #ff99c8;
-    border-radius: 10px;
-    font-size: 14px;
-    outline: none;
-    transition: all 0.3s ease-in-out;
-}
-
-input:focus {
-    border-color: #ff4d94;
-    box-shadow: 0 0 8px rgba(255, 77, 148, 0.5);
-}
-
-/* Button Styling */
-button {
-    background: linear-gradient(135deg, #ff66b2, #ff3385);
+    min-height: 100vh;
+    background-color: #f5f7fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  
+  /* Header */
+  .dashboard-header {
+    background-color: #4a6fa5;
     color: white;
-    font-size: 16px;
-    font-weight: bold;
-    padding: 12px 20px;
-    border: none;
-    border-radius: 20px;
-    cursor: pointer;
-    transition: all 0.3s ease-in-out;
-    margin-top: 15px;
-    width: 100%;
-}
-
-button:hover {
-    background: linear-gradient(135deg, #ff3385, #ff66b2);
-    transform: scale(1.05);
-}
-
-/* Message Styling */
-.success {
-    color: #00c851;
-    font-weight: bold;
-    margin-top: 15px;
-}
-
-.error {
-    color: #ff4444;
-    font-weight: bold;
-    margin-top: 15px;
-}
-
-/* ADDED: Generic message class for status messages */
-.message {
-    font-weight: bold;
-    margin-top: 15px;
-}
-
-/* ADDED: Dashboard Styles Section - Begin */
-/* Dashboard container */
-.dashboard {
+    padding: 1.5rem;
     text-align: center;
-}
-
-/* User greeting section with bottom border */
-.user-greeting {
-    margin-bottom: 20px;
-    padding-bottom: 15px;
-    border-bottom: 2px solid #ff99c8;
-}
-
-/* Styling for the email display in user greeting */
-.user-greeting p {
-    color: #5a1a5b;
-    font-size: 14px;
-}
-
-/* Main content area of dashboard */
-.dashboard-content {
-    min-height: 60px;
-    margin-bottom: 20px;
-    font-size: 14px;
-    color: #5a1a5b;
-}
-
-/* Special styling for logout button - red gradient */
-.logout-btn {
-    background: linear-gradient(135deg, #ff4444, #cc0000);
-}
-
-/* Hover effect for logout button */
-.logout-btn:hover {
-    background: linear-gradient(135deg, #cc0000, #ff4444);
-}
-/* ADDED: Dashboard Styles Section - End */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .dashboard-header h1 {
+    margin: 0;
+    font-size: 2.5rem;
+    letter-spacing: 1px;
+  }
+  
+  .dashboard-header h2 {
+    margin: 0.5rem 0 1rem;
+    font-weight: normal;
+    font-size: 1.2rem;
+    opacity: 0.9;
+  }
+  
+  .user-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  .logout-btn {
+    background-color: transparent;
+    border: 1px solid white;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .logout-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  /* Navigation */
+  .dashboard-nav {
+    display: flex;
+    background-color: white;
+    border-bottom: 1px solid #e0e6ed;
+  }
+  
+  .tab-btn {
+    flex: 1;
+    padding: 1rem;
+    background: none;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: #4a6fa5;
+    position: relative;
+  }
+  
+  .tab-btn:hover {
+    background-color: #f5f7fa;
+  }
+  
+  .tab-btn.active {
+    font-weight: bold;
+    color: #2c4870;
+  }
+  
+  .tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background-color: #4a6fa5;
+  }
+  
+  /* Main content */
+  .dashboard-content {
+    flex: 1;
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+  }
+  
+  /* Search Tab */
+  .search-form {
+    background-color: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    margin-bottom: 2rem;
+  }
+  
+  .search-type-selector {
+    display: flex;
+    margin-bottom: 1rem;
+  }
+  
+  .search-type {
+    margin-right: 1.5rem;
+    padding: 0.5rem 0;
+    cursor: pointer;
+    color: #666;
+    display: flex;
+    align-items: center;
+  }
+  
+  .search-type input {
+    margin-right: 0.5rem;
+  }
+  
+  .search-type.active {
+    color: #4a6fa5;
+    font-weight: bold;
+  }
+  
+  .search-input-group {
+    display: flex;
+  }
+  
+  .search-input-group input {
+    flex: 1;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px 0 0 4px;
+    font-size: 1rem;
+  }
+  
+  .search-input-group button {
+    padding: 0.75rem 1.5rem;
+    background-color: #4a6fa5;
+    color: white;
+    border: none;
+    border-radius: 0 4px 4px 0;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .search-input-group button:hover {
+    background-color: #3b5c8c;
+  }
+  
+  .search-input-group button:disabled {
+    background-color: #a0b4ce;
+    cursor: not-allowed;
+  }
+  
+  .results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  /* Submit Tab */
+  .guidelines-box {
+    background-color: #f0f4f9;
+    border-left: 4px solid #4a6fa5;
+    padding: 1rem 1.5rem;
+    margin-bottom: 2rem;
+    border-radius: 0 4px 4px 0;
+  }
+  
+  .guidelines-box h3 {
+    margin-top: 0;
+    color: #2c4870;
+  }
+  
+  .review-form {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  }
+  
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #333;
+  }
+  
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-family: inherit;
+  }
+  
+  .form-group textarea {
+    resize: vertical;
+    min-height: 150px;
+  }
+  
+  .ratings-group {
+    background-color: #f8fafc;
+    padding: 1rem;
+    border-radius: 4px;
+    border: 1px solid #e6eef7;
+  }
+  
+  .rating-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.75rem;
+  }
+  
+  .rating-label {
+    flex: 0 0 150px;
+    font-weight: 500;
+  }
+  
+  .star-rating {
+    display: flex;
+  }
+  
+  .star {
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #ddd;
+    transition: color 0.2s;
+    margin-right: 0.25rem;
+  }
+  
+  .star:hover,
+  .star.active {
+    color: #ffd700;
+  }
+  
+  .submit-button {
+    background-color: #4a6fa5;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .submit-button:hover {
+    background-color: #3b5c8c;
+  }
+  
+  .submission-message {
+    margin-top: 1rem;
+    padding: 1rem;
+    border-radius: 4px;
+    background-color: #e6f3e6;
+    color: #2e7d32;
+    text-align: center;
+  }
+  
+  /* Review Card */
+  .review-card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  
+  .review-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  .review-header {
+    padding: 1.25rem 1.5rem;
+    background-color: #f0f4f9;
+    border-bottom: 1px solid #e6eef7;
+  }
+  
+  .review-header h3 {
+    margin: 0 0 0.5rem;
+    color: #2c4870;
+  }
+  
+  .course-info {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .review-body {
+    padding: 1.5rem;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .review-ratings {
+    padding: 1rem 1.5rem;
+    background-color: #f8fafc;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+  
+  .rating-item {
+    display: flex;
+    align-items: center;
+  }
+  
+  .rating-value {
+    margin-left: 0.5rem;
+    color: #4a6fa5;
+    font-weight: bold;
+  }
+  
+  .review-footer {
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #666;
+    font-size: 0.9rem;
+  }
+  
+  .review-meta {
+    display: flex;
+    align-items: center;
+  }
+  
+  .reviewer {
+    font-style: italic;
+  }
+  
+  .review-date {
+    margin-left: 1rem;
+    color: #888;
+  }
+  
+  .like-button {
+    background: none;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 0.25rem 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .like-button:hover {
+    background-color: #f0f4f9;
+  }
+  
+  .like-button.liked {
+    background-color: #e3f2fd;
+    border-color: #90caf9;
+    color: #1976d2;
+  }
+  
+  /* Footer */
+  .dashboard-footer {
+    background-color: #2c4870;
+    color: white;
+    padding: 1rem;
+    text-align: center;
+    opacity: 0.9;
+  }
+  
+  /* Responsive tweaks */
+  @media screen and (max-width: 768px) {
+    .dashboard-content {
+      padding: 1rem;
+    }
+    
+    .results-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .review-ratings {
+      grid-template-columns: 1fr;
+    }
+    
+    .rating-row {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    .rating-label {
+      margin-bottom: 0.5rem;
+    }
+    
+    .review-footer {
+      flex-direction: column;
+    }
+    
+    .review-meta {
+      margin-bottom: 0.5rem;
+    }
+  }
