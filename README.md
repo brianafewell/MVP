@@ -1,154 +1,235 @@
-# HW 4: Registration App Authentication with Supabase
+# HW 5: Technical Assignment - Improving an MVP
 
-## 🛠️ Why Use Supabase?
-Authentication can be error-prone when building an application. Handling **user registration, email verification, login, and database management** can be painful with traditional setups that require managing your own database and email services. 
+## 🚀 PULSE: Professor Undergrad Learning & Student Evaluations
 
-**Supabase simplifies authentication** by providing a backend-as-a-service solution with built-in **PostgreSQL, authentication, and email handling**. With Supabase, we no longer need to manually manage user accounts, write our own authentication logic, or send emails ourselves.
+PULSE is a web application designed to help students share and access reviews of professors and courses. Similar to RateMyProfessor but specifically tailored for Spelman and Morehouse students, PULSE allows users to:
 
-This new version of our **Registration App** replaces our old authentication system with Supabase, significantly reducing complexity and making it easier to maintain. 
+- Search for professors or courses
+- Submit detailed reviews with ratings across multiple criteria
+- Read and like other students' reviews
+- Track their own submitted reviews
 
-Clone this repo to get started: https://github.com/amoretti86/digitalentrepreneurship-lab3b
+The app uses React for the frontend, Express for the backend, and Supabase for authentication and database management, creating a secure and scalable platform for student feedback.
 
----
+## 💻 Live Demo
 
-## 🔄 What Changed?
-### ❌ Removed Files
-1. **`db.js`** – We no longer need to manually create a PostgreSQL database and handle users. Supabase manages the database for us.
-2. **`email.js`** – Supabase handles email verification automatically, eliminating the need for our custom email-sending logic.
-3. **`migration.js`** – Since Supabase manages the database schema, we no longer need to run manual migrations.
-4. **Heroku Postgres Add-On** – Supabase provides a **fully managed PostgreSQL database**, so we don't need to add a separate database on Heroku.
+Check out the live demo at [https://pulse-app-demo-0cdb634ad214.herokuapp.com/](https://pulse-app-demo-0cdb634ad214.herokuapp.com/)
 
----
+Sign up with a Spelman or Morehouse email address, verify your account, and explore the functionality.
 
-## 🛠️ How to Set Up Supabase
+## 🛠️ Setup Instructions
 
-### 1️⃣ **Sign Up for Supabase**
-1. Go to [https://supabase.com/](https://supabase.com/) and create an account.
-2. Click **"New Project"** and give it a name.
-3. Choose a strong password for the database and click **"Create new project"**.
-4. Wait for Supabase to set up your database (this may take a few seconds).
+### 1. Clone the Repository
 
-### 2️⃣ **Obtain Your Supabase Keys**
-Once your project is created:
-1. Go to **"Settings" → "API"** in the Supabase Dashboard.
-2. Copy the following values:
-   - **Supabase URL**
-   - **Anon Key**
-   - **Service Role Key** (Needed for admin operations)
-
----
-
-## 🌍 Updating the Backend
-
-### 3️⃣ **Set Up Environment Variables**
-In your backend project, create a `.env` file and add:
 ```bash
+git clone https://github.com/amoretti86/pulse-app.git
+cd pulse-app
+```
+
+### 2. Create Your Own Repository
+
+Since you'll be making significant improvements to the app, create your own GitHub repository:
+
+```bash
+# Create a new repository on GitHub first, then:
+
+# Remove the original remote
+git remote remove origin
+
+# Add your new repository as the origin
+git remote add origin https://github.com/your-username/your-repo-name.git
+
+# Push to your new repository
+git push -u origin main
+```
+
+### 3. Set Up Supabase
+
+1. **Sign up for Supabase**
+   - Go to [https://supabase.com/](https://supabase.com/) and create an account
+   - Click "New Project" and give it a name
+   - Choose a strong password for the database
+   - Select a region close to your users
+   - Click "Create new project"
+
+2. **Get Your Supabase Credentials**
+   - Go to "Settings" → "API" in the Supabase Dashboard
+   - Copy the following values:
+     - **Supabase URL**
+     - **Service Role Key** (needed for admin operations)
+
+3. **Set Up the Database Schema**
+   - In the Supabase Dashboard, go to "SQL Editor"
+   - Click "New Query"
+   - Copy the contents of `server/pulse_schema.sql` from the repo
+   - Paste into the SQL editor and click "Run"
+
+### 4. Configure Environment Variables
+
+Create a `.env` file in the project root:
+
+```
 SUPABASE_URL=your-supabase-url
-SUPABASE_ANON_KEY=your-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 PORT=5000
 ```
-📌 **Check your spam folder** for the email verification code when signing up!
 
-### 4️⃣ **Install Dependencies**
-We need the Supabase SDK to connect to our authentication system. Install it by running:
+### 5. Install Dependencies
+
 ```bash
-npm install @supabase/supabase-js
+# Install server dependencies
+npm install
+
+# Install client dependencies
+cd client
+npm install
+cd ..
 ```
 
-### 5️⃣ **Update `server.js` to Use Supabase**
-Modify the backend to use Supabase for authentication:
-```javascript
-const { createClient } = require("@supabase/supabase-js");
-require("dotenv").config();
+### 6. Run Locally
 
-const supabase = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+```bash
+# Start the server
+npm run dev
 ```
 
-### 6️⃣ **Registering a User**
-Replace manual database inserts with Supabase's authentication system:
-```javascript
-const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: { data: { name } } // Store additional user info
-});
-```
+Visit `http://localhost:3000` to see your app running locally.
 
-### 7️⃣ **Email Verification Using a 6-Digit Code**
-Instead of email links, users enter a **6-digit verification code**:
-```javascript
-const { data, error } = await supabase.auth.verifyOtp({
-    email,
-    token: verificationCode,  // The 6-digit code from the email
-    type: "signup"
-});
-```
-📌 **Users must manually enter the verification code from their email.**
+## 📊 Managing Your Supabase Database
 
-### 8️⃣ **Logging In Users**
-Login now uses Supabase authentication:
-```javascript
-const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password
-});
-```
+### Viewing the Database Schema
 
----
+1. Go to the Supabase Dashboard
+2. Select "Table Editor" from the sidebar
+3. You'll see the following tables:
+   - `reviews` - Contains all professor reviews
+   - `review_likes` - Tracks which users liked which reviews
 
-## 🗄️ Accessing the Supabase Database
-To view and manage user accounts:
-1. **Go to Supabase Dashboard** → Click **"Authentication"** → **"Users"**.
-2. You can manually verify users, delete accounts, or reset passwords.
-3. To query the database directly, go to **"Database" → "Table Editor"**.
+### Managing Users
 
-📌 You can also query data programmatically using the **Supabase SDK**:
-```javascript
-const { data, error } = await supabase.from("users").select("*");
-```
-
----
+1. Go to "Authentication" → "Users" in the Supabase Dashboard
+2. Here you can:
+   - View all registered users
+   - Delete user accounts
+   - Manage user metadata
+   - Reset passwords
 
 ## 🚀 Deploying to Heroku
-Since we are using Supabase for authentication and storage, we **no longer need to add Heroku Postgres**.
 
-### Steps to Deploy:
-1. **Set environment variables on Heroku**
-```bash
-heroku config:set SUPABASE_URL=your-supabase-url
-heroku config:set SUPABASE_ANON_KEY=your-anon-key
-heroku config:set SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
-heroku config:set PORT=5000
-```
+1. **Install Heroku CLI** (if not already installed)
+   ```bash
+   npm install -g heroku
+   ```
 
-2. **Push your code to Heroku**
-```bash
-git add .
-git commit -m "Deploy Supabase backend to Heroku"
-git push heroku main  # or 'master' if using older repo
-```
+2. **Login to Heroku**
+   ```bash
+   heroku login
+   ```
 
-3. **Restart the app**
-```bash
-heroku restart
-```
+3. **Create a Heroku App**
+   ```bash
+   heroku create your-app-name
+   ```
 
-4. **Check logs for errors**
-```bash
-heroku logs --tail
-```
+4. **Set Environment Variables**
+   ```bash
+   heroku config:set SUPABASE_URL=your-supabase-url
+   heroku config:set SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+   ```
 
----
+5. **Push to Heroku**
+   ```bash
+   git push heroku main
+   ```
 
-## 🎯 Summary
-✅ **No need for manual PostgreSQL setup** – Supabase handles it.
-✅ **No need for custom email handling** – Supabase sends verification codes.
-✅ **Faster and easier authentication** with Supabase's built-in auth.
-✅ **Easier database access** via Supabase UI and SDK.
-✅ **Simpler deployment** – Just set environment variables and deploy!
+6. **Open Your App**
+   ```bash
+   heroku open
+   ```
 
-This version of the **Registration App** is now **much simpler and more scalable** with Supabase.
+## 📝 Assignment: Improve the MVP
+
+Your task is to significantly improve the PULSE MVP by implementing new features, enhancing the design, or adding monetization. Here's how to proceed:
+
+### Step 1: Test and Analyze the Demo
+
+- Sign up on the demo app
+- Submit some test reviews
+- Search for professors/courses
+- Identify strengths and weaknesses
+
+### Step 2: Clone and Setup
+
+- Follow the setup instructions above
+- Make sure you have your own GitHub repository
+- Set up your own Supabase project
+
+### Step 3: Choose Your Improvement Path
+
+Select at least one of these paths to focus your improvements:
+
+#### A. Enhanced Functionality
+- Add professor profiles with more details
+- Implement course-specific reviews
+- Create department analytics
+- Add filtering and sorting options for reviews
+- Implement a professor response system
+
+#### B. Improved User Experience
+- Redesign the interface for better aesthetics
+- Optimize for mobile devices
+- Add dark mode support
+- Implement user profiles with achievements
+- Create a notification system for new reviews
+
+#### C. Monetization Strategy
+- Integrate Stripe payment processing
+- Create a premium tier with additional features
+- Develop a sponsored content system for departments
+- Implement targeted ads for campus services
+- Create a professor verification system with subscription
+
+### Step 4: Get User Feedback
+
+**This is a critical part of the assignment!**
+
+- Find at least 5 real users to test your improved app
+- Document their feedback systematically
+- Implement changes based on user feedback
+- Create a short "user research" summary
+
+### Step 5: Documentation
+
+- Update the README with your changes
+- Create a CHANGELOG.md documenting improvements
+- Include screenshots of your enhanced app
+- Write a short business case if you implemented monetization
+
+### Step 6: Deployment and Submission
+
+- Deploy your improved app to Heroku
+- Push your code to your GitHub repository
+- Submit the following:
+  - GitHub repository URL
+  - Deployed app URL
+  - User research summary (PDF)
+  - Any monetization strategy documentation (if applicable)
+
+## 💡 Evaluation Criteria
+
+Your improved MVP will be evaluated based on:
+
+1. **Technical Implementation** - Code quality and working features
+2. **User Experience** - Interface design and usability
+3. **User Research** - Quality of feedback collected and applied
+4. **Innovation** - Creativity of improvements
+5. **Documentation** - Clarity of documentation and business case
+
+## 💪 Bonus Points
+
+- Implement features that differentiate PULSE from similar platforms
+- Demonstrate user growth or engagement metrics
+- Develop a compelling business model with revenue projections
+- Create a roadmap for future development
+
+Best of luck improving the PULSE MVP! This assignment simulates the real-world process of iterating on a product based on user feedback, an essential skill for digital entrepreneurs.
