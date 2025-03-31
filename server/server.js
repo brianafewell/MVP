@@ -114,6 +114,7 @@ app.get('/api/reviews/latest', async (req, res) => {
       professorName: review.professor_name,
       courseName: review.course_name,
       semester: review.semester,
+      department: review.department,
       reviewText: review.review_text,
       ratings: {
         teaching: review.teaching_rating,
@@ -158,6 +159,9 @@ app.get('/api/search', async (req, res) => {
       searchQuery = searchQuery.ilike('professor_name', `%${query}%`);
     } else if (type === 'course') {
       searchQuery = searchQuery.ilike('course_name', `%${query}%`);
+    } else if (type === 'department') {
+      // For department searches, look for the department name in the course name field
+      searchQuery = searchQuery.ilike('course_name', `%${query}%`);
     }
     
     const { data, error } = await searchQuery;
@@ -198,6 +202,7 @@ app.post('/api/reviews/submit', async (req, res) => {
     professorName, 
     courseName, 
     semester, 
+    department,
     reviewText, 
     ratings,
     studentEmail,
@@ -220,6 +225,7 @@ app.post('/api/reviews/submit', async (req, res) => {
         professor_name: professorName,
         course_name: courseName,
         semester: semester,
+        department: department,
         review_text: reviewText,
         teaching_rating: ratings.teaching || 0,
         difficulty_rating: ratings.difficulty || 0,

@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS reviews (
   professor_name TEXT NOT NULL,
   course_name TEXT NOT NULL,
   semester TEXT NOT NULL,
+  department TEXT NOT NULL,
   review_text TEXT NOT NULL,
   teaching_rating SMALLINT DEFAULT 0,
   difficulty_rating SMALLINT DEFAULT 0,

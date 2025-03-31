@@ -26,9 +26,14 @@ function Dashboard({ name, email, onLogout }) {
   const [overallRating, setOverallRating] = useState(0);
   const [submissionMessage, setSubmissionMessage] = useState('');
   
+  // department filter state
+  const [departmentFilter, setDepartmentFilter] = useState('');
+  const [department, setDepartment] = useState('');
+
   // Review browsing states
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(false);
+
   
   // ==========================================
   // EFFECTS
@@ -57,11 +62,15 @@ function Dashboard({ name, email, onLogout }) {
   
   const handleSearch = async (e) => {
     e.preventDefault();
-    if (!searchQuery.trim()) return;
+    
+    // For department searches, use the selected department as the query
+    const query = searchType === 'department' ? departmentFilter : searchQuery;
+    
+    if (!query.trim()) return;
     
     setIsSearching(true);
     try {
-      const response = await axios.get(`/api/search?type=${searchType}&query=${encodeURIComponent(searchQuery)}`);
+      const response = await axios.get(`/api/search?type=${searchType}&query=${encodeURIComponent(query)}`);
       setSearchResults(response.data.results);
     } catch (error) {
       console.error('Error searching:', error);
@@ -84,6 +93,7 @@ function Dashboard({ name, email, onLogout }) {
         professorName,
         courseName,
         semester,
+        department,
         reviewText,
         ratings: {
           teaching: teachingRating,
@@ -102,6 +112,7 @@ function Dashboard({ name, email, onLogout }) {
       setProfessorName('');
       setCourseName('');
       setSemester('');
+      setDepartment('');
       setReviewText('');
       setTeachingRating(0);
       setDifficultyRating(0);
@@ -258,21 +269,62 @@ function Dashboard({ name, email, onLogout }) {
               checked={searchType === 'course'} 
               onChange={() => setSearchType('course')} 
             />
-            Department/Course
+            Course
+          </label>
+          <label className={`search-type ${searchType === 'department' ? 'active' : ''}`}>
+            <input 
+              type="radio" 
+              name="searchType" 
+              value="department" 
+              checked={searchType === 'department'} 
+              onChange={() => setSearchType('department')} 
+            />
+            Department
           </label>
         </div>
         
         <div className="search-input-group">
-          <input
-            type="text"
-            placeholder={searchType === 'professor' ? "Professor's name..." : "Department or course code..."}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            required
-          />
-          <button type="submit" disabled={isSearching}>
-            {isSearching ? 'Searching...' : 'Search'}
-          </button>
+          {searchType === 'department' ? (
+            <select 
+              className="department-select"
+              value={departmentFilter}
+              onChange={(e) => setDepartmentFilter(e.target.value)}
+            >
+              <option value="">Select a Department</option>
+              <option value="Math">Mathematics</option>
+              <option value="Comp Sci">Computer Science</option>
+              <option value="English">English</option>
+              <option value="Biology">Biology</option>
+              <option value="Chemistry">Chemistry</option>
+              <option value="Physics">Physics</option>
+              <option value="Psychology">Psychology</option>
+              <option value="Sociology">Sociology</option>
+              <option value="History">History</option>
+              <option value="Political Science">Political Science</option>
+              <option value="Economics">Economics</option>
+              <option value="Business">Business</option>
+              <option value="Engineering">Engineering</option>
+              <option value="Art">Art</option>
+              <option value="Music">Music</option>
+            </select>
+          ) : (
+            <input
+              className="search-input"
+              type="text"
+              placeholder={searchType === 'professor' 
+                ? "Professor's name..." 
+                : "Course code or name..."}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              required={searchType !== 'department'}
+            />
+          )}
+          
+          <div className="search-action-row">
+            <button type="submit" disabled={isSearching}>
+              {isSearching ? 'Searching...' : 'Search'}
+            </button>
+          </div>
         </div>
       </form>
       
@@ -312,6 +364,33 @@ function Dashboard({ name, email, onLogout }) {
         <p>Please keep your review respectful and constructive. Focus on course content, teaching methods, and your learning experience. Avoid personal attacks or inappropriate comments.</p>
         <p>The most helpful reviews provide specific examples and suggestions for improvement.</p>
       </div>
+
+      <div className="form-group">
+      <label>Department*</label>
+      <select 
+        className="department-select"
+        value={department}
+        onChange={(e) => setDepartment(e.target.value)}
+        required
+      >
+        <option value="">Select a Department</option>
+        <option value="Math">Mathematics</option>
+        <option value="Comp Sci">Computer Science</option>
+        <option value="English">English</option>
+        <option value="Biology">Biology</option>
+        <option value="Chemistry">Chemistry</option>
+        <option value="Physics">Physics</option>
+        <option value="Psychology">Psychology</option>
+        <option value="Sociology">Sociology</option>
+        <option value="History">History</option>
+        <option value="Political Science">Political Science</option>
+        <option value="Economics">Economics</option>
+        <option value="Business">Business</option>
+        <option value="Engineering">Engineering</option>
+        <option value="Art">Art</option>
+        <option value="Music">Music</option>
+      </select>
+    </div>
       
       <form className="review-form" onSubmit={handleSubmitReview}>
         <div className="form-group">
