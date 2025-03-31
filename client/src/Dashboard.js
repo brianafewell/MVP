@@ -34,6 +34,12 @@ function Dashboard({ name, email, onLogout }) {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  // Summarization state
+  const [summary, setSummary] = useState('');
+  const [isSummarizing, setIsSummarizing] = useState(false);
+  const [showSummary, setShowSummary] = useState(false);
+  const [reviewsToSummarize, setReviewsToSummarize] = useState([]);
+
   
   // ==========================================
   // EFFECTS
@@ -47,7 +53,37 @@ function Dashboard({ name, email, onLogout }) {
   // ==========================================
   // API FUNCTIONS
   // ==========================================
-  
+  const handleSummarizeReviews = async (reviewsToSummarize) => {
+    if (!reviewsToSummarize || reviewsToSummarize.length === 0) {
+        alert('Please search for reviews to summarize.');
+        return;
+    }
+
+    setIsSummarizing(true);
+    setSummary('');
+    setShowSummary(false);
+
+    const reviewTexts = reviewsToSummarize.map(review => review.reviewText);
+
+    try {
+        const response = await axios.post('/api/summarize-reviews', { reviewTexts });
+        if (response.data.success) {
+            setSummary(response.data.summary);
+            setShowSummary(true);
+        } else {
+            console.error('Error summarizing reviews:', response.data.message);
+            setSummary(`Error summarizing reviews: ${response.data.message}`);
+            setShowSummary(true);
+        }
+    } catch (error) {
+        console.error('Error summarizing reviews:', error);
+        setSummary('Error summarizing reviews. Please try again.');
+        setShowSummary(true);
+    } finally {
+        setIsSummarizing(false);
+    }
+};
+
   const fetchLatestReviews = async () => {
     setLoading(true);
     try {
@@ -329,13 +365,29 @@ function Dashboard({ name, email, onLogout }) {
       </form>
       
       <div className="search-results">
-        {searchResults.length > 0 ? (
-          <div className="results-grid">
-            {searchResults.map(review => (
-              <ReviewCard key={review.id} review={review} />
-            ))}
+      {searchResults.length > 0 ? (
+          <div>
+              <div className="results-grid">
+                  {searchResults.map(review => (
+                      <ReviewCard key={review.id} review={review} />
+                  ))}
+              </div>
+              <button
+                  className="summarize-button"
+                  onClick={() => handleSummarizeReviews(searchResults)}
+                  disabled={isSummarizing || searchResults.length === 0}
+              >
+                  {isSummarizing ? 'Summarizing...' : 'Summarize Reviews'}
+              </button>
+              {showSummary && (
+                  <div className="summary-box">
+                      <h3>Review Summary</h3>
+                      <p>{summary}</p>
+                  </div>
+              )}
           </div>
-        ) : (
+      ) : (
+
           <div className="recent-reviews">
             <h3>Recent Reviews</h3>
             {loading ? (

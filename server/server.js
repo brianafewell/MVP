@@ -3,6 +3,7 @@ const express = require('express');
 const path = require('path');
 const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config();
+//const fetch = require('node-fetch');
 
 // Initialize Supabase client
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
@@ -397,6 +398,58 @@ app.post('/resend-verification', async (req, res) => {
     }
 });
 
+// ========================================================
+// Review Summarization Route using Mistral AI
+// ========================================================
+app.post('/api/summarize-reviews', async (req, res) => {
+  const { reviewTexts } = req.body;
+
+  if (!reviewTexts || !Array.isArray(reviewTexts) || reviewTexts.length === 0) {
+      return res.status(400).json({ success: false, message: 'No review texts provided for summarization.' });
+  }
+
+  const prompt = `Please provide a concise summary of the following student reviews:\n\n${reviewTexts.map(text => `- ${text}`).join('\n')}\n\nSummary:`;
+  const mistralApiKey = process.env.MISTRAL_API_KEY;
+
+  if (!mistralApiKey) {
+      console.error('MISTRAL_API_KEY is not set in the environment variables.');
+      return res.status(500).json({ success: false, message: 'LLM summarization is unavailable at this time.' });
+  }
+
+  try {
+      const response = await fetch('https://api.mistral.ai/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${mistralApiKey}`,
+          },
+          body: JSON.stringify({
+              model: 'mistral-small-latest', // Or another Mistral model of your choice
+              messages: [{ role: 'user', content: prompt }],
+              max_tokens: 200, // Adjust as needed
+          }),
+      });
+
+      if (!response.ok) {
+          const errorData = await response.json();
+          console.error('Mistral AI API Error:', errorData);
+          return res.status(response.status).json({ success: false, message: 'Error summarizing reviews with Mistral AI.', error: errorData });
+      }
+
+      const data = await response.json();
+      const summary = data.choices[0]?.message?.content;
+
+      if (summary) {
+          res.json({ success: true, summary });
+      } else {
+          res.status(500).json({ success: false, message: 'Could not extract summary from Mistral AI response.' });
+      }
+
+  } catch (error) {
+      console.error('Error calling Mistral AI API:', error);
+      res.status(500).json({ success: false, message: 'Error calling the Mistral AI API.', error: error.message });
+  }
+});
 
 // Fallback route to serve React frontend for any unmatched routes
 app.get('*', (req, res) => {
